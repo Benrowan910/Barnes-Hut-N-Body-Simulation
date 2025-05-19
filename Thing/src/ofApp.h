@@ -1,6 +1,12 @@
 #pragma once
 #include "ofMain.h"
+#include "ofxGui.h"
 #include <vector>
+
+extern "C" {
+    void* __std_find_trivial_1 = nullptr;
+    void* __std_find_trivial_2 = nullptr;
+}
 
 // 2D vector utility struct
 struct Vec2 {
@@ -76,8 +82,9 @@ struct Node {
 
     void insert(Body* b);
     void subdivide();
-    void calculateForce(Body& b, float theta);
+    void calculateForce(Body& b, float theta, float G);
     void calculateDensity(Body& b, float radius);
+    void draw();
 
 };
 
@@ -100,6 +107,8 @@ public:
     std::unordered_map<GridKey, std::vector<Body*>, GridKeyHasher> grid;
 
     SpatialHash(float cellSize) : cellSize(cellSize) {}
+    SpatialHash(const SpatialHash&) = delete;  // Disable copying
+    SpatialHash& operator=(const SpatialHash&) = delete;
 
     // Hash a position to grid coordinates
     GridKey hash(const Vec2& position) const {
@@ -137,9 +146,22 @@ public:
 
 class ofApp : public ofBaseApp {
 public:
+
+    ofApp();
+
     std::vector<Body> bodies;
     float theta;       // Approximation threshold
     float timeStep;    // Time step for simulation
+    float lastTime;
+    float fps;
+
+    Node* quadtreeRoot = nullptr;
+    SpatialHash spatialHash;
+    float maxForce = 0.0f;
+
+    ofxPanel gui;
+    ofxFloatSlider gSlider;
+    ofxFloatSlider timeStepSlider;
 
     void setup();
     void update();
